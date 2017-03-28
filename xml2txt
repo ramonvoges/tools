@@ -7,70 +7,43 @@
 # konkateniert.
 #
 # Als Argument benötigt das Programm die TEI/XML-Datei mit den Gedichten, z.B.
-# "Arndt_Gedichte.xml".
+# "Arndt_Gedichte.xml": ~> ./xml2txt Arnd_Gedichte.xml
+# Vorher noch: ~> chmod +x xml2txt, um die Datei ausführbar zu machen.
 #
 # Version 0.1
 #
 # Ramon Voges
 #
 
+# gem install nokogiri, falls nicht vorhanden
 require 'nokogiri'
 
+# Erstes Argument muss Dateiname sein
 filename = ARGV.shift
 
+# Verwendet Nokogiri und lädt die angegebene Datei
 doc = Nokogiri::XML(File.open(filename))
 
-# Erster Versuch
-# doc.css("text body div div head[type='h4']").each do |titel|
-  # Gibt den Titel aus
-  # puts titel.text.strip
-  # Gibt das nächste Element aus
-  # puts titel.next_element.text
-# end
-
-# Zweiter Versuch
-# gedicht = doc.css("text body div div").first
-# gedicht.children.each do |child|
-#   puts child.text if child.name == "head"
-#   puts child.text if child.name == "p"
-#   puts child.text.gsub("                                 ", "") if child.name == "lg"
-# end
-
-# Dritten Versuch
-#
-
-# Gedicht = Struct.new(:title, :year, :stanzas)
-#
-# gedichte = doc.css("text body div div").first
-# stanzas = String.new
-# gedicht = Gedicht.new
-# gedichte.children.each do |child|
-#   gedicht[:title] = child.text.strip if child.name == "head"
-#   gedicht[:year] = child.text.strip if child.name == "p"
-#   stanzas << child.text.gsub("                                 ", "") if child.name == "lg"
-# end
-# gedicht.stanzas = stanzas
-
-
-# Nr 4:
-#
-# File.open("Test.txt", "w") do |f|
+# Struct als Bauanleitung für die Gedichte
 Gedicht = Struct.new(:title, :year, :stanzas)
 
-doc.css("text body div div").each do |poem|
+# Durchsucht das Dokument nach den Gedichten
+doc.css("text body div div").each do |g|
   stanzas = String.new
   gedicht = Gedicht.new
-  poem.children.each do |child|
-    gedicht[:title] = child.text.strip if child.name == "head"
-    gedicht[:year] = child.text.strip if child.name == "p"
+  # Zu jedem Gedicht wird ein Struct geschaffen
+  g.children.each do |child|
+    gedicht.title = child.text.strip if child.name == "head"
+    gedicht.year = child.text.strip if child.name == "p"
     stanzas << child.text.gsub("                                 ", "") if child.name == "lg"
   end
   gedicht.stanzas = stanzas
+  # Stellt sicher, dass eine Jahresangabe vorliegt
   gedicht.year ||= "Ohne Jahr"
+  # Schreibt die Dateien
   File.open("#{gedicht.year.gsub(".", "")} #{gedicht.title.gsub(".", "")}.txt", "a") do |f|
     f.puts gedicht.title
     f.puts gedicht.year
     f.puts gedicht.stanzas
   end
 end
-# end
