@@ -1,0 +1,76 @@
+#!/usr/bin/env ruby
+#
+# Parst die TEI/XML-Datei von Textgrid mit sämtlichen Gedichten von Arndt
+# und erzeugt für jedes Gedicht eine einzelne Datei. Benannt ist die Datei
+# nach dem Schema "<Jahr> <Titel>.txt". Falls kein Jahr angegeben ist, wird
+# "Ohne Jahr" ergänzt. Haben mehrere Gedichte den gleichen Titel, werden sie
+# konkateniert.
+#
+# Als Argument benötigt das Programm die TEI/XML-Datei mit den Gedichten, z.B.
+# "Arndt_Gedichte.xml".
+#
+# Version 0.1
+#
+# Ramon Voges
+#
+
+require 'nokogiri'
+
+filename = ARGV.shift
+
+doc = Nokogiri::XML(File.open(filename))
+
+# Erster Versuch
+# doc.css("text body div div head[type='h4']").each do |titel|
+  # Gibt den Titel aus
+  # puts titel.text.strip
+  # Gibt das nächste Element aus
+  # puts titel.next_element.text
+# end
+
+# Zweiter Versuch
+# gedicht = doc.css("text body div div").first
+# gedicht.children.each do |child|
+#   puts child.text if child.name == "head"
+#   puts child.text if child.name == "p"
+#   puts child.text.gsub("                                 ", "") if child.name == "lg"
+# end
+
+# Dritten Versuch
+#
+
+# Gedicht = Struct.new(:title, :year, :stanzas)
+#
+# gedichte = doc.css("text body div div").first
+# stanzas = String.new
+# gedicht = Gedicht.new
+# gedichte.children.each do |child|
+#   gedicht[:title] = child.text.strip if child.name == "head"
+#   gedicht[:year] = child.text.strip if child.name == "p"
+#   stanzas << child.text.gsub("                                 ", "") if child.name == "lg"
+# end
+# gedicht.stanzas = stanzas
+
+
+# Nr 4:
+#
+# File.open("Test.txt", "w") do |f|
+Gedicht = Struct.new(:title, :year, :stanzas)
+
+doc.css("text body div div").each do |poem|
+  stanzas = String.new
+  gedicht = Gedicht.new
+  poem.children.each do |child|
+    gedicht[:title] = child.text.strip if child.name == "head"
+    gedicht[:year] = child.text.strip if child.name == "p"
+    stanzas << child.text.gsub("                                 ", "") if child.name == "lg"
+  end
+  gedicht.stanzas = stanzas
+  gedicht.year ||= "Ohne Jahr"
+  File.open("#{gedicht.year.gsub(".", "")} #{gedicht.title.gsub(".", "")}.txt", "a") do |f|
+    f.puts gedicht.title
+    f.puts gedicht.year
+    f.puts gedicht.stanzas
+  end
+end
+# end
