@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 #
-# Parst die TEI/XML-Datei von Textgrid mit sämtlichen Gedichten von Arndt
-# und erzeugt für jedes Gedicht eine einzelne Datei. Benannt ist die Datei
-# nach dem Schema "<Jahr> <Titel>.txt". Falls kein Jahr angegeben ist, wird
-# "Ohne Jahr" ergänzt. Haben mehrere Gedichte den gleichen Titel, werden sie
+# Parst die TEI/XML-Datei von Textgrid mit sämtlichen Gedichten von Arndt und
+# erzeugt für jedes Gedicht eine einzelne Datei. Benannt ist die Datei nach dem
+# Schema "<nnnnn> <Datum> <Autor>.txt". Falls kein Datum angegeben ist, wird
+# "ohne Jahr" ergänzt. Haben mehrere Gedichte den gleichen Titel, werden sie
 # konkateniert.
 #
 # Als Argument benötigt das Programm die TEI/XML-Datei mit den Gedichten, z.B.
@@ -11,7 +11,7 @@
 # Vorher noch: ~> chmod +x xml2txt, um die Datei ausführbar zu machen.
 # Außerdem: ~> gem install nokogiri, falls noch nicht installiert.
 #
-# Version 0.1
+# Version 0.2
 #
 # Ramon Voges
 #
