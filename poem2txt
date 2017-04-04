@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+#
+# Parst die TEI/XML-Datei von Textgrid mit sämtlichen Gedichten von Arndt und
+# erzeugt für jedes Gedicht eine einzelne Datei. Benannt ist die Datei nach dem
+# Schema "<nnnnn> <Datum> <Autor>.txt". Falls kein Datum angegeben ist, wird
+# "ohne Jahr" ergänzt. Haben mehrere Gedichte den gleichen Titel, werden sie
+# konkateniert.
+#
+# Als Argument benötigt das Programm die TEI/XML-Datei mit den Gedichten, z.B.
+# "Arndt_Gedichte.xml": ~> ./xml2txt Arnd_Gedichte.xml
+# Vorher noch: ~> chmod +x xml2txt, um die Datei ausführbar zu machen.
+# Außerdem: ~> gem install nokogiri, falls noch nicht installiert.
+#
+# Version 0.3
+#
+# Ramon Voges
+#
+
+# gem install nokogiri, falls nicht vorhanden
+require 'nokogiri'
+
+# The edition consists of different entries.
+class Edition
+  def initialize(filename)
+    @entry = Struct.new(:author, :title, :date, :stanzas)
+    @filename = filename
+    @count = 0
+    parse(@filename)
+  end
+
+  def parse(file)
+    @doc = Nokogiri::XML(File.open(file))
+    # poem
+  end
+
+  # Every entry in the edition represents a poem.
+  def poems
+    @doc.css("TEI").each do |p|
+      @count += 1
+      @poem = @entry.new
+      from_tei(p)
+      save
+    end
+  end
+
+  def from_tei(p)
+    parse_author(p)
+    parse_title(p)
+    parse_date(p)
+    parse_stanzas(p)
+  end
+
+  def save
+    file = "#{sprintf '%05d', @count} #{@poem.date} #{@poem.author.split(",").first}.txt"
+    File.open(file, "a") do |f|
+      f.puts @poem.title
+      f.puts @poem.date
+      f.puts @poem.stanzas
+    end
+  end
+
+  private
+  def parse_author(p)
+    @poem.author = p.search("author").text
+  end
+
+  def parse_title(p)
+    @poem.title = p.search("title").first.text
+  end
+
+  def parse_date(p)
+    d = p.css("text body div div p[rend='zenoPC']").first
+    if d == nil || d.inner_html =~ /<hi/
+      @poem.date ||= "ohne Datum"
+    else
+      @poem.date = d.inner_html.gsub(".", "")
+    end
+  end
+
+  def parse_stanzas(p)
+    stanzas = String.new
+    stanzas <<  p.css("lg").text.gsub(/^ +/, "")
+    @poem.stanzas = stanzas
+  end
+
+end
+
+
+edition = Edition.new(ARGV.shift)
+edition.poems
+
