@@ -51,7 +51,7 @@ class Edition
   end
 
   def save
-    file = "#{sprintf '%05d', @count} #{@poem.date} #{@poem.author.split(",").first}.txt"
+    file = "%05d #{@poem.date} #{@poem.author.split(",").first}.txt" %[@count]
     File.open(file, "a") do |f|
       f.puts @poem.title
       f.puts @poem.date
