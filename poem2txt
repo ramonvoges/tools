@@ -22,7 +22,6 @@ require 'nokogiri'
 # The edition consists of different entries.
 class Edition
   def initialize(filename)
-    @entry = Struct.new(:author, :title, :date, :stanzas)
     @filename = filename
     @count = 0
     parse(@filename)
@@ -30,57 +29,51 @@ class Edition
 
   def parse(file)
     @doc = Nokogiri::XML(File.open(file))
-    # poem
   end
 
   # Every entry in the edition represents a poem.
+  Poem = Struct.new(:author, :title, :date, :stanzas)
   def poems
+    # Iterate over each poem in the TEI document.
     @doc.css("TEI").each do |p|
       @count += 1
-      @poem = @entry.new
-      from_tei(p)
-      save
-    end
-  end
-
-  def from_tei(p)
-    parse_author(p)
-    parse_title(p)
-    parse_date(p)
-    parse_stanzas(p)
-  end
-
-  def save
-    file = "%05d #{@poem.date} #{@poem.author.split(",").first}.txt" %[@count]
-    File.open(file, "a") do |f|
-      f.puts @poem.title
-      f.puts @poem.date
-      f.puts @poem.stanzas
+      # Creat instances of the Struct Poem for each poem.
+      poem = Poem.new(parse_author(p), parse_title(p), parse_date(p), parse_stanzas(p))
+      save(poem)
     end
   end
 
   private
+  def save(work)
+    file = "%05d #{work.date} #{work.author.split(",").first}.txt" %[@count]
+    File.open(file, "a") do |f|
+      f.puts work.title
+      f.puts work.date
+      f.puts work.stanzas
+    end
+  end
+
   def parse_author(p)
-    @poem.author = p.search("author").text
+    p.search("author").text
   end
 
   def parse_title(p)
-    @poem.title = p.search("title").first.text
+    p.search("title").first.text
   end
 
   def parse_date(p)
     d = p.css("text body div div p[rend='zenoPC']").first
     if d == nil || d.inner_html =~ /<hi/
-      @poem.date ||= "ohne Datum"
+      "ohne Datum"
     else
-      @poem.date = d.inner_html.gsub(".", "")
+      d.inner_html.gsub(".", "")
     end
   end
 
   def parse_stanzas(p)
     stanzas = String.new
     stanzas <<  p.css("lg").text.gsub(/^ +/, "")
-    @poem.stanzas = stanzas
+    stanzas
   end
 
 end
