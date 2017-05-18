@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+#
+# Das Programm exportiert aus der ausgewählten Bibtex-Datenbank die
+# gewünschten Datensätze und gibt sie im festgelegten Stil aus.
+#
+# Version 0.0.1: Grundlegende Befehle
+#
+
+# Lädt die benötigten Gems
+require 'bibtex'
+require 'citeproc'
+require 'csl/styles'
+
+# Lädt die Bibtex-Datei
+bib = BibTeX.open(ENV["HOME"] + '/ownCloud/Documents/Literatur/' + ARGV.shift) # Use ENV[Home]
+
+# Generiert einen neuen CiteProc-Prozessor mit den gewünschten
+# Eigenschaften
+cp = CiteProc::Processor.new style: 'foerster-geisteswissenschaft', format: 'text', locale: 'de-DE'
+
+# Lädt die Bibtex-Angaben in den Prozessor
+cp.import bib.to_citeproc
+
+# Schreibt den Eintrag mit dem Cite Key ARGV[1] in STDOUT
+while ARGV.empty? == false
+  puts cp.render :bibliography, id: ARGV.shift.to_s
+end
+
+# Greift auf alle Items im CiteProc-Prozessor zurück und formatiert die
+# geladenen Angaben und wirft das Ergebnis aus. Außerdem werden die
+# Keywords darunter gesetzt.
+#
+# cp.items.each_key do |k|
+#   buch_formatiert = cp.render :bibliography, id: k.to_s
+#   puts buch_formatiert
+#   puts ""
+#   puts "Stichworte: " + bib[k.to_s].keywords.to_s
+#   puts
+#   # puts "Zusammenfassung: " + bib[k.to_s].address.to_s
+#   puts cp[k].abstract.to_s
+#   # puts bib[k.to_s].note
+#   puts "----------------------------------------------------------"
+# end
+
