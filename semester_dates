@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+require 'date'
+
+semester_start = Date.new(2017,10,9)
+semester_end = Date.new(2018,2,2)
+dates = []
+day = ARGV.shift
+
+if day.nil?
+  puts 'Outputs the dates of a given weekday in the winter semester 2017/18.'
+  puts
+  abort 'USAGE: semester_dates weekday'
+end
+
+(semester_start..semester_end).each do |date|
+  case day
+  when 'monday'
+    dates << date if date.monday?
+  when 'tuesday'
+    dates << date if date.tuesday?
+  when 'wednesday'
+    dates << date if date.wednesday?
+  when 'thursday'
+    dates << date if date.thursday?
+  when 'friday'
+    dates << date if date.friday?
+  when 'saturday'
+    dates << date if date.saturday?
+  when 'sunday'
+    dates << date if date.sunday?
+  else
+    abort "ERROR: Please enter a weekday as an argument."
+  end
+end
+
+# Delete the days during Christmas Holidays
+dates.delete_if {|date| date > Date.new(2017,12,24) && date < Date.new(2018,1,6)}
+# Delete if Tag der Deutschen Einheit
+dates.delete_if {|date| date == Date.new(2017,10,3)}
+# Delete if Allerheiligen
+dates.delete_if {|date| date == Date.new(2017,11,1)}
+
+# Format dates according to DD.MM.YYYY
+dates.collect! {|d| d.strftime("%d.%m.%Y")}
+
+puts dates
