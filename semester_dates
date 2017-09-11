@@ -2,8 +2,8 @@
 
 require 'date'
 
-semester_start = Date.new(2017,10,9)
-semester_end = Date.new(2018,2,2)
+semester_start = Date.new(2017, 10, 9)
+semester_end = Date.new(2018, 2, 2)
 dates = []
 day = ARGV.shift
 
@@ -13,7 +13,7 @@ if day.nil?
   abort 'USAGE: semester_dates weekday'
 end
 
-(semester_start..semester_end).each do |date|
+(semester_start...semester_end).each do |date|
   case day
   when 'monday'
     dates << date if date.monday?
@@ -30,18 +30,18 @@ end
   when 'sunday'
     dates << date if date.sunday?
   else
-    abort "ERROR: Please enter a weekday as an argument."
+    abort 'ERROR: Please enter a weekday as an argument.'
   end
 end
 
 # Delete the days during Christmas Holidays
-dates.delete_if {|date| date > Date.new(2017,12,24) && date < Date.new(2018,1,6)}
+dates.delete_if { |date| date > Date.new(2017, 12, 24) && date < Date.new(2018, 1, 6) }
 # Delete if Tag der Deutschen Einheit
-dates.delete_if {|date| date == Date.new(2017,10,3)}
+dates.delete_if { |date| date == Date.new(2017, 10, 3) }
 # Delete if Allerheiligen
-dates.delete_if {|date| date == Date.new(2017,11,1)}
+dates.delete_if { |date| date == Date.new(2017, 11, 1) }
 
 # Format dates according to DD.MM.YYYY
-dates.collect! {|d| d.strftime("%d.%m.%Y")}
+dates.collect! { |d| d.strftime('%d.%m.%Y') }
 
 puts dates
