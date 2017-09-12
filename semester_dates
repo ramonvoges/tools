@@ -13,7 +13,7 @@ if day.nil?
   abort 'USAGE: semester_dates weekday'
 end
 
-(semester_start...semester_end).each do |date|
+(semester_start..semester_end).each do |date|
   case day
   when 'monday'
     dates << date if date.monday?
